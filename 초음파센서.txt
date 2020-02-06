@@ -1,0 +1,49 @@
+#include <Servo.h>  //라이브러리 포함하기
+Servo myservo;
+#define TRIG 2  //초음파센서 TRIG 2번핀으로 지정
+#define ECHO 3  //초음파센서 ECHO 3번핀으로 지정
+#define RED 10  //빨강 LED 10번핀으로 지정
+#define GREEN 11  //초록 LED 11번핀으로 지정
+
+int pos=0;  // 서보모터 각도 변수 초기값 0으로 선언
+
+void setup() {
+  pinMode(TRIG,OUTPUT);
+  pinMode(ECHO,INPUT);
+  myservo.attach(9);  // 서보모터 9번핀으로 지정
+  myservo.write(pos);
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(TRIG,LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG,HIGH); // 초음파 센서 출력
+  delayMicroseconds(2);
+  digitalWrite(TRIG,LOW);
+  long distance=pulseIn(ECHO,HIGH)/58.2; // 초음파 센서 입력값 cm로 변환
+  Serial.print(distance); // 시리얼모니터로 cm 출력
+  Serial.println("cm");
+  
+  if(distance>30){  // 센서와의 거리가 30cm를 넘을 경우(차량 없음)
+    analogWrite(RED,255); // 빨간불 켜짐(차단기 닫힘 신호)
+    analogWrite(GREEN,0); 
+    delay(2000); // 차량 통과를 위해 차단기 닫힘 2초 지연 
+      if(pos!=0){ // for문 무한반복 방지
+        for(pos=90; pos>0; pos--){  // 차단기 닫히는 속도 제어를 위한 for문
+                myservo.write(pos);
+                delay(15);  // 차단기 속도 제어
+        }
+      }
+    }else{  // 센서와의 거리가 30cm 이하일 경우(차량 있음)
+      analogWrite(RED,0);
+      analogWrite(GREEN,255); // 초록불 켜짐(차단기 열림 신호)
+      if(pos!=90){  // for문 무한반복 방지
+        for(pos=0; pos<90; pos++){  // 차단기 열리는 속도 제어를 위한 for문
+              myservo.write(pos);
+              delay(15);  // 차단기 속도 제어
+        }
+      }
+    }
+  delay(100);
+}
