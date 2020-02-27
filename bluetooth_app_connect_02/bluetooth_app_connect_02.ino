@@ -29,7 +29,7 @@ void loop() {
       buffer[bufferPosition] = '\0';
 
       //스마트폰으로 전송할 문자를 시리얼 모니터에 출력
-      Serial.println("보내는 문자: ");      
+      Serial.print("보내는 문자: ");      
       Serial.write(buffer, bufferPosition);
       BTSerial.write(buffer, bufferPosition);
       bufferPosition = 0;
